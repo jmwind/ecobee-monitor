@@ -1,0 +1,36 @@
+{
+  "name": "ecobee-monitor",
+  "version": "1.0.0",
+  "description": "Ecobee Monitoring App",
+  "main": "output/function.js",
+  "scripts": {
+    "pkg": "zip function.zip package.json output/*",
+    "build": "tsc --lib es2015 --outDir output src/*.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jmwind/ecobee-monitor.git"
+  },
+  "keywords": [
+    "home",
+    "automation",
+    "ecobee"
+  ],
+  "author": "jmwind",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jmwind/ecobee-monitor/issues"
+  },
+  "homepage": "https://github.com/jmwind/ecobee-monitor#readme",
+  "dependencies": {
+    "@google-cloud/bigquery": "^2.0.3",
+    "firebase-admin": "^6.4.0",
+    "node": "^8.11.1",
+    "typed-rest-client": "git+https://github.com/jmwind/typed-rest-client-module.git",
+    "typescript": "^3.1.6"
+  },
+  "devDependencies": {
+    "@types/node": "^10.12.10",
+    "@types/express": "^4.11.0"
+  }
+}

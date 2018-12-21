@@ -1,0 +1,5 @@
+node_modules/
+output/
+service-account.json
+.DS_Store
+function*.zip
