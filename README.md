@@ -7,3 +7,4 @@
 * remove verbose result return unless param is set on request params
 * build mobile all in RN
 * can we optimize rooms based on heating latency? Would ML help?
+* reports should be scoped by week
