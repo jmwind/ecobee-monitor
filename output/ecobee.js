@@ -38,13 +38,13 @@ exports.__esModule = true;
 var rc = require("typed-rest-client/RestClient");
 var rb = require("typed-rest-client/Handlers");
 // To regen a new set of test tokens goto https://www.ecobee.com/home/developer/api/examples/ex1.shtml
-var API_KEY = "zioyI0qOlADdDvO0wDl81SzDY5lU2cTZ";
 var BASE_URL = "https://api.ecobee.com/";
 exports.GCP_PROJECT_ID = "cedar-gearbox-224119";
 var CloudStore = /** @class */ (function () {
     function CloudStore(db) {
         this.token = "";
         this.refresh = "";
+        this.api_key = "";
         this.db = db;
     }
     CloudStore.prototype.initialize = function () {
@@ -52,16 +52,14 @@ var CloudStore = /** @class */ (function () {
             var _this = this;
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0:
-                        console.error("DOC: " + this.db.collection('ecobee-monitor'));
-                        console.error("KEYS: " + this.db.collection('ecobee-monitor').doc('keys'));
-                        return [4 /*yield*/, this.db.collection('ecobee-monitor').doc('keys').get()
-                                .then(function (doc) {
-                                _this.token = doc.data().token;
-                                _this.refresh = doc.data().refresh;
-                            })["catch"](function (err) {
-                                console.error('Error getting tokens from CloudStore', err);
-                            })];
+                    case 0: return [4 /*yield*/, this.db.collection('ecobee-monitor').doc('keys').get()
+                            .then(function (doc) {
+                            _this.token = doc.data().token;
+                            _this.refresh = doc.data().refresh;
+                            _this.api_key = doc.data().api_key;
+                        })["catch"](function (err) {
+                            console.error('Error getting tokens from CloudStore', err);
+                        })];
                     case 1:
                         _a.sent();
                         return [2 /*return*/];
@@ -74,11 +72,12 @@ var CloudStore = /** @class */ (function () {
         this.refresh = refresh;
         this.db.collection('ecobee-monitor').doc('keys').set({
             token: this.token,
-            refresh: this.refresh
+            refresh: this.refresh,
+            api_key: this.api_key
         });
     };
     CloudStore.prototype.get = function () {
-        return { access_token: this.token, refresh_token: this.refresh };
+        return { access_token: this.token, refresh_token: this.refresh, api_key: this.api_key };
     };
     return CloudStore;
 }());
@@ -163,7 +162,7 @@ function refreshToken(store) {
         return __generator(this, function (_a) {
             switch (_a.label) {
                 case 0:
-                    data = 'grant_type=refresh_token&code='.concat(store.get().refresh_token).concat('&client_id=').concat(API_KEY);
+                    data = 'grant_type=refresh_token&code='.concat(store.get().refresh_token).concat('&client_id=').concat(store.get().api_key);
                     options = {};
                     options.additionalHeaders = options.additionalHeaders || {};
                     options.additionalHeaders["Content-Type"] = "application/x-www-form-urlencoded; charset=UTF-8";

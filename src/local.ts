@@ -22,7 +22,7 @@ async function runLocally() {
     ecobee.fetchThermostatData(store)
         .then(thermostats => {           
             let data: any[] = ecobee.trimThermostatData(thermostats);
-            ecobee.storeInBq(data, bq);
+            //ecobee.storeInBq(data, bq);
             console.log(data);            
         });       
 }

@@ -5,7 +5,6 @@ import * as fb from "firebase-admin";
 import * as bigquery from '@google-cloud/bigquery';
 
 // To regen a new set of test tokens goto https://www.ecobee.com/home/developer/api/examples/ex1.shtml
-let API_KEY: string = "zioyI0qOlADdDvO0wDl81SzDY5lU2cTZ";
 const BASE_URL: string = "https://api.ecobee.com/";
 export const GCP_PROJECT_ID: string = "cedar-gearbox-224119";
 
@@ -48,6 +47,7 @@ export interface WeatherForcast {
 export interface RefreshToken {
     access_token: string;
     refresh_token: string;
+    api_key: string;
 }
 
 export interface TokenStore {    
@@ -58,17 +58,17 @@ export interface TokenStore {
 export class CloudStore implements TokenStore {    
     token: string = "";
     refresh: string = "";
+    api_key: string = "";
     db: fb.firestore.Firestore;
     constructor(db: fb.firestore.Firestore) {
         this.db = db;
     }
     async initialize() {
-        console.error("DOC: " + this.db.collection('ecobee-monitor'));
-        console.error("KEYS: " + this.db.collection('ecobee-monitor').doc('keys'));
         await this.db.collection('ecobee-monitor').doc('keys').get()
             .then((doc) => {
                 this.token = doc.data()!.token;
-                this.refresh = doc.data()!.refresh;                
+                this.refresh = doc.data()!.refresh;
+                this.api_key = doc.data()!.api_key;                
             })
             .catch((err) => {
                 console.error('Error getting tokens from CloudStore', err);
@@ -79,11 +79,12 @@ export class CloudStore implements TokenStore {
         this.refresh = refresh;        
         this.db.collection('ecobee-monitor').doc('keys').set({
             token: this.token,
-            refresh: this.refresh
+            refresh: this.refresh,
+            api_key: this.api_key
         });
     }    
     get(): RefreshToken {        
-        return {access_token: this.token, refresh_token: this.refresh};
+        return {access_token: this.token, refresh_token: this.refresh, api_key: this.api_key};
     }
 }
 
@@ -151,7 +152,7 @@ export async function fetchThermostatData(store: TokenStore): Promise<Thermostat
 }
 
 async function refreshToken(store: TokenStore) {      
-    let data = 'grant_type=refresh_token&code='.concat(store.get().refresh_token).concat('&client_id=').concat(API_KEY);
+    let data = 'grant_type=refresh_token&code='.concat(store.get().refresh_token).concat('&client_id=').concat(store.get().api_key);
     let options: rc.IRequestOptions = <rc.IRequestOptions>{};
     options.additionalHeaders = options.additionalHeaders || {};    
     options.additionalHeaders["Content-Type"] = "application/x-www-form-urlencoded; charset=UTF-8";

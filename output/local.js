@@ -62,7 +62,7 @@ function runLocally() {
                     ecobee.fetchThermostatData(store)
                         .then(function (thermostats) {
                         var data = ecobee.trimThermostatData(thermostats);
-                        ecobee.storeInBq(data, bq);
+                        //ecobee.storeInBq(data, bq);
                         console.log(data);
                     });
                     return [2 /*return*/];
