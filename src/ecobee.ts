@@ -9,6 +9,11 @@ import * as ebee from './ecobee_types';
 const BASE_URL: string = "https://api.ecobee.com/";
 export const GCP_PROJECT_ID: string = "cedar-gearbox-224119";
 
+
+/**
+ * Access tokens are stored in Firebase as it's a simple kv store and
+ * has fast access. 
+ */
 export class CloudStore implements ebee.TokenStore {    
     token: string = "";
     refresh: string = "";
