@@ -3,59 +3,13 @@ import * as ri from 'typed-rest-client/Interfaces'
 import * as rb from 'typed-rest-client/Handlers'
 import * as fb from "firebase-admin";
 import * as bigquery from '@google-cloud/bigquery';
+import * as ebee from './ecobee_types';
 
 // To regen a new set of test tokens goto https://www.ecobee.com/home/developer/api/examples/ex1.shtml
 const BASE_URL: string = "https://api.ecobee.com/";
 export const GCP_PROJECT_ID: string = "cedar-gearbox-224119";
 
-interface EcoResponse {
-    page: string;
-    thermostatList: [Thermostat];
-}
-
-export interface Thermostat {
-    identifier: string;
-    name: string;
-    runtime: Runtime;
-    equipmentStatus: string;
-    weather: Weather;
-}
-
-export interface Runtime {
-    lastStatusModified: string;
-    actualTemperature: number;
-    actualHumidity: number;
-    desiredHeat: number;
-    desiredHumidity: number;
-    connected: boolean;
-}
-
-export interface Weather {
-    forecasts: [WeatherForcast];
-    weatherStation: string;
-}
-
-export interface WeatherForcast {
-    weatherSymbol: number;
-    temperature: number;
-    pressure: number;
-    windSpeed: number;
-    windDirection: string;
-    relativeHumidity: number;
-}
-
-export interface RefreshToken {
-    access_token: string;
-    refresh_token: string;
-    api_key: string;
-}
-
-export interface TokenStore {    
-    put(token: string, refresh_token: string): void;
-    get(): RefreshToken;
-}
-
-export class CloudStore implements TokenStore {    
+export class CloudStore implements ebee.TokenStore {    
     token: string = "";
     refresh: string = "";
     api_key: string = "";
@@ -83,7 +37,7 @@ export class CloudStore implements TokenStore {
             api_key: this.api_key
         });
     }    
-    get(): RefreshToken {        
+    get(): ebee.RefreshToken {        
         return {access_token: this.token, refresh_token: this.refresh, api_key: this.api_key};
     }
 }
@@ -91,7 +45,7 @@ export class CloudStore implements TokenStore {
 /**
  * Returns a mapping of Ecobee themostart JSON to the BigQuery schema.
  */
-export function trimThermostatData(thermostats: Thermostat[]): any[] {
+export function trimThermostatData(thermostats: ebee.Thermostat[]): any[] {
     let data: any = [];
     let timestamp = Math.round((new Date()).getTime() / 1000).toString();
     thermostats.forEach(thermostat => {
@@ -142,16 +96,16 @@ export function statusConvert(s: string): string {
     return s.length == 0 ? "Idle" : s;
 }
 
-export async function fetchThermostatData(store: TokenStore): Promise<Thermostat[]> {
+export async function fetchThermostatData(store: ebee.TokenStore): Promise<ebee.Thermostat[]> {
         await refreshToken(store);
         let token = store.get().access_token;
         let handler: ri.IRequestHandler = new rb.BearerCredentialHandler(token);       
         let rest: rc.RestClient = new rc.RestClient('ecobee', BASE_URL, [handler]);    
-        let response: rc.IRestResponse<EcoResponse> = await rest.get<EcoResponse>('/1/thermostat?json=\{"selection":\{"includeAlerts":"true","selectionType":"registered","selectionMatch":"","includeEvents":"true","includeSettings":"true","includeRuntime":"true","includeEquipmentStatus":"true","includeWeather":"true"\}\}');            
+        let response: rc.IRestResponse<ebee.EcoResponse> = await rest.get<ebee.EcoResponse>('/1/thermostat?json=\{"selection":\{"includeAlerts":"true","selectionType":"registered","selectionMatch":"","includeEvents":"true","includeSettings":"true","includeRuntime":"true","includeEquipmentStatus":"true","includeWeather":"true"\}\}');            
         return response.result!.thermostatList;          
 }
 
-async function refreshToken(store: TokenStore) {      
+async function refreshToken(store: ebee.TokenStore) {      
     let data = 'grant_type=refresh_token&code='.concat(store.get().refresh_token).concat('&client_id=').concat(store.get().api_key);
     let options: rc.IRequestOptions = <rc.IRequestOptions>{};
     options.additionalHeaders = options.additionalHeaders || {};    
@@ -159,6 +113,6 @@ async function refreshToken(store: TokenStore) {
     
     let rest: rc.RestClient = new rc.RestClient('ecobee refresh', "https://www.ecobee.com");  
     
-    let response: rc.IRestResponse<RefreshToken> = await rest.create<RefreshToken>('/home/token', data, options);
+    let response: rc.IRestResponse<ebee.RefreshToken> = await rest.create<ebee.RefreshToken>('/home/token', data, options);
     store.put(response.result!.access_token, response.result!.refresh_token);
 }
