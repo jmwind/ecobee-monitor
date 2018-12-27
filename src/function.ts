@@ -33,11 +33,11 @@ export async function run(req: Request, res: Response) {
             res.status(200);
             let data: any[] = ecobee.trimThermostatData(thermostats);
             ecobee.storeInBq(data, bq);         
-            res.send(data);
+            res.send("Found: " + data.length);
         })
         .catch((reason) => { 
             res.status(500);
-            console.error("ERROR: " + JSON.parse(reason));
+            console.error("Error: " + JSON.parse(reason));
             res.send(reason);
         });                    
 };

@@ -1,3 +1,7 @@
+/**
+ * Ecobee API definitions from 
+ * https://www.ecobee.com/home/developer/api/documentation/v1/objects/Thermostat.shtml
+ */
 export interface EcoResponse {
     page: string;
     thermostatList: [Thermostat];
