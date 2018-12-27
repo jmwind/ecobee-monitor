@@ -37,7 +37,7 @@ export async function run(req: Request, res: Response) {
         })
         .catch((reason) => { 
             res.status(500);
-            console.error("ERROR" + reason);
+            console.error("ERROR: " + JSON.parse(reason));
             res.send(reason);
         });                    
 };

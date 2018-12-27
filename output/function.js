@@ -86,7 +86,7 @@ function run(req, res) {
                         res.send(data);
                     })["catch"](function (reason) {
                         res.status(500);
-                        console.error("ERROR" + reason);
+                        console.error("ERROR: " + JSON.parse(reason));
                         res.send(reason);
                     });
                     return [2 /*return*/];
